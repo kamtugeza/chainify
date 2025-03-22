@@ -1,6 +1,7 @@
 {
   "name": "chainsmith",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/kamtugeza/chainsmith/issues"
   },
@@ -9,5 +10,11 @@
     "url": "https://github.com/kamtugeza/chainsmith"
   },
   "author": "Oleksii Novikov <hello@theoleksii.me>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.9"
+  }
 }
