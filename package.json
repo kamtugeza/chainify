@@ -1,0 +1,13 @@
+{
+  "name": "chainsmith",
+  "version": "0.1.0",
+  "bugs": {
+    "url": "https://github.com/kamtugeza/chainsmith/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kamtugeza/chainsmith"
+  },
+  "author": "Oleksii Novikov <hello@theoleksii.me>",
+  "license": "MIT"
+}
