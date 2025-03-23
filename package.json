@@ -1,6 +1,6 @@
 {
-  "name": "chainsmith",
-  "version": "0.2.0",
+  "name": "@kamtugeza/chainify",
+  "version": "0.3.0",
   "type": "module",
   "bugs": {
     "url": "https://github.com/kamtugeza/chainsmith/issues"
@@ -11,6 +11,7 @@
   },
   "author": "Oleksii Novikov <hello@theoleksii.me>",
   "license": "MIT",
+  "main": "./lib/chainify.js",
   "scripts": {
     "test": "vitest"
   },
