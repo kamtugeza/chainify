@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ChainifyStep, ChainifyStepType } from '../../lib/utils/step'
-import { vitest } from 'vitest'
+import { ChainifyStep, ChainifyStepType } from '../../lib/utils/step.js'
 
 describe('of', () => {
   it('throws an exception if `name` is not a string', () => {

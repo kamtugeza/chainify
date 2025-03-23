@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import map from '../lib/map'
-import { ChainifyStep, ChainifyStepType } from '../lib/utils/step'
+import { ChainifyStep, ChainifyStepType } from '../lib/utils/step.js'
+import map from '../lib/map.js'
 
 describe('map', () => {
     it('throws an exception when `steps` are not an array', () => {
