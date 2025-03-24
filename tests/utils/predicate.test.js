@@ -9,3 +9,12 @@ describe('isNonNull', () => {
     expect(ChainifyPredicate.isNonNull(null)).toBe(false)
   })
 })
+
+describe('isNull', () => {
+  it('returns `true` when an input is `null`; otherwise, it returns `false``', () => {
+    expect(ChainifyPredicate.isNull()).toBe(false)
+    expect(ChainifyPredicate.isNull(5)).toBe(false)
+    expect(ChainifyPredicate.isNull({})).toBe(false)
+    expect(ChainifyPredicate.isNull(null)).toBe(true)
+  })
+})

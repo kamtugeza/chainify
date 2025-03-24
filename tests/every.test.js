@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { ChainifyStep, ChainifyStepType } from '../lib/utils/step.js'
-import some from '../lib/some.js'
+import every from '../lib/every.js'
 
-describe('some', () => {
+describe('every', () => {
   function buildTest () {
-    const chain = some([
+    const chain = every([
       ChainifyStep.of('number', (input) => typeof input === 'number' ? input * 2 : null),
-      ChainifyStep.of('string', (input) => typeof input === 'string' ? `${input}!` : null),
+      ChainifyStep.of('positive', (input) => typeof input === 'number' && input >=0  ? input : null),
       ChainifyStep.of(
         'currency',
         (symbol) => (input) => {
@@ -22,28 +22,28 @@ describe('some', () => {
           return isGreaterOrEqual ? input : null
         },
         ChainifyStepType.factory,
-      )
-    ]) 
-   
+      ),
+    ])
+
     return { chain }
   }
 
   it('throws an exception when `steps` are not an array', () => {
-    expect(() => some()).toThrowErrorMatchingInlineSnapshot(`[Error: \`steps\` should be an array.]`)
-    expect(() => some({})).toThrowErrorMatchingInlineSnapshot(`[Error: \`steps\` should be an array.]`)
+    expect(() => every()).toThrowErrorMatchingInlineSnapshot(`[Error: \`steps\` should be an array.]`)
+    expect(() => every({})).toThrowErrorMatchingInlineSnapshot(`[Error: \`steps\` should be an array.]`)
   })
 
   it('throws an exception when `predicate` is not a function', () => {
-    expect(() => some([], () => true)).not.toThrow()
-    expect(() => some([])).not.toThrow()
-    expect(() => some([], null)).toThrowErrorMatchingInlineSnapshot(`[Error: \`predicate\` should be a function.]`)
-    expect(() => some([], 'abc')).toThrowErrorMatchingInlineSnapshot(`[Error: \`predicate\` should be a function.]`)
+    expect(() => every([], () => true)).not.toThrow()
+    expect(() => every([])).not.toThrow()
+    expect(() => every([], null)).toThrowErrorMatchingInlineSnapshot(`[Error: \`predicate\` should be a function.]`)
+    expect(() => every([], 'abc')).toThrowErrorMatchingInlineSnapshot(`[Error: \`predicate\` should be a function.]`)
   })
 
   it('clears the sequence after the input decoration', () => {
     const addOne = (input) => ++input
     const double = (input) => input * 2
-    const chain = some([
+    const chain = every([
       ChainifyStep.of('addOne', addOne),
       ChainifyStep.of('double', double),
     ]) 
@@ -56,11 +56,19 @@ describe('some', () => {
   })
 
   it('returns `null` when there is no steps', () => {
-    const chain = some([])
+    const chain = every([])
 
-    expect(chain(5)).toBe(null)
-    expect(chain('abc')).toBe(null)
-    expect(chain({})).toBe(null)
+    expect(chain()).toBe(undefined)
+    expect(chain(null)).toBe(null)
+    expect(chain(5)).toBe(5) 
+    expect(chain(7n)).toBe(7n)
+    expect(chain('abc')).toBe('abc')
+
+    const inputObject = {}
+    expect(chain(inputObject)).toBe(inputObject)
+
+    const inputArray = []
+    expect(chain(inputArray)).toBe(inputArray)
   })
 
   it('returns the result of the plain step if it is not `null`', () => {
@@ -68,11 +76,13 @@ describe('some', () => {
 
     expect(chain.number(5)).toBe(10)
     expect(chain.number('abc')).toBe(null)
-    expect(chain.string(5)).toBe(null)
-    expect(chain.string('abc')).toBe('abc!')
+
+    expect(chain.positive(5)).toBe(5)
+    expect(chain.positive(-5)).toBe(null)
+    expect(chain.positive('abc')).toBe(null)
   })
 
-  it('returns the result of the factory step, which is not `null`', () => {
+  it('returns the result of the factory step if it is not `null`', () => {
     const { chain } = buildTest()
 
     expect(chain.currency(5, 5)).toBe(null)
@@ -89,25 +99,25 @@ describe('some', () => {
     expect(chain.gte(10, 15)).toBe(15)
   })
 
-  it('returns the result of the first step, which is not `null`', () => {
+  it('returns the result of the last step if all steps returns non-null values', () => {
     const { chain } = buildTest()
+    
+    expect(chain.number.positive(5)).toBe(10)
+    expect(chain.number.positive(-5)).toBe(null)
+    expect(chain.number.positive('abc')).toBe(null)
+    
+    expect(chain.positive.number(5)).toBe(10)
+    expect(chain.positive.number(-5)).toBe(null)
+    expect(chain.positive.number('abc')).toBe(null)
 
-    expect(chain.number.string(15)).toBe(30)
-    expect(chain.number.string('ahoy')).toBe('ahoy!')
-    expect(chain.number.string([])).toBe(null)
-
-    expect(chain.string.number(15)).toBe(30)
-    expect(chain.string.number('hello')).toBe('hello!')
-    expect(chain.string.number({})).toBe(null)
-
-    expect(chain.currency('$').gte(30, 45)).toBe(45)
+    expect(chain.currency('$').gte(30, 45)).toBe(null)
     expect(chain.currency('$').gte(30, '$64')).toBe(64)
     expect(chain.currency('$').gte(30, 15)).toBe(null)
     expect(chain.currency('$').gte(30, '15')).toBe(null)
     expect(chain.currency('$').gte(30, undefined)).toBe(null)
 
-    expect(chain.gte(22).currency('€', 40)).toBe(40)
-    expect(chain.gte(22).currency('€', '€40')).toBe(40)
+    expect(chain.gte(22).currency('€', 40)).toBe(null)
+    expect(chain.gte(22).currency('€', '€40')).toBe(null)
     expect(chain.gte(22).currency('€', 20)).toBe(null)
     expect(chain.gte(22).currency('€', '25')).toBe(null)
     expect(chain.gte(22).currency('€', {})).toBe(null)
@@ -117,15 +127,16 @@ describe('some', () => {
     expect(chain.number.gte(10, '15')).toBe(null)
     expect(chain.number.gte(10, [])).toBe(null)
     
-    expect(chain.gte(10).number(15)).toBe(15)
-    expect(chain.gte(10).number(5)).toBe(10)
+    expect(chain.gte(10).number(15)).toBe(30)
+    expect(chain.gte(10).number(5)).toBe(null)
     expect(chain.gte(10).number('15')).toBe(null)
     expect(chain.gte(10).number([])).toBe(null)
 
-    expect(chain.number.string.gte(15).currency('$', 44)).toBe(88)
-    expect(chain.number.string.gte(15).currency('$', '$44')).toBe('$44!')
+    expect(chain.number.positive.gte(15).currency('$', 44)).toBe(null)
+    expect(chain.number.positive.gte(15).currency('$', '$44')).toBe(null)
 
-    expect(chain.currency('€').gte(6).number.string(100)).toBe(100)
-    expect(chain.currency('€').gte(6).number.string('€99.99')).toBe(99.99)
+    expect(chain.currency('$').number.positive.gte(10, 5)).toBe(null)
+    expect(chain.currency('$').number.positive.gte(10, '$2')).toBe(null)
+    expect(chain.currency('$').number.positive.gte(10, '$5')).toBe(10)
   })
 })

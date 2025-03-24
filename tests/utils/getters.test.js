@@ -1,16 +1,16 @@
 import { describe, expect, it, vitest as vi } from 'vitest'
 import { ChainifyStep, ChainifyStepType } from '../../lib/utils/step.js'
-import { registerSteps } from '../../lib/utils/getters.js'
+import { defineGetters } from '../../lib/utils/getters.js'
 
-describe('registerSteps', () => {
-  function buildTest() {
+describe('defineGetters', () => {
+  function buildTest () {
     const handler = vi.fn() 
     handler.__SEQUENCE__ = []
 
     const plain = vi.fn()
     const factory = vi.fn(() => plain)
 
-    registerSteps(handler, [
+    defineGetters(handler, [
       ChainifyStep.of('plain', plain),
       ChainifyStep.of('factory', factory, ChainifyStepType.factory),
     ])
@@ -24,11 +24,11 @@ describe('registerSteps', () => {
   }
 
   it('throws an exception when `steps` contains a non-step configuration', () => {
-    expect(() => registerSteps(() => 5, [{ }]))
+    expect(() => defineGetters(() => 5, [{ }]))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`name\` should be a string.]`)
-    expect(() => registerSteps(() => 5, [{ name: 'name' }]))
+    expect(() => defineGetters(() => 5, [{ name: 'name' }]))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`fn\` should be a function.]`)
-    expect(() => registerSteps(() => 5, [{ name: 'name', fn: () => null }]))
+    expect(() => defineGetters(() => 5, [{ name: 'name', fn: () => null }]))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`type\` should be one of: factory, plain.]`)
   })
 
