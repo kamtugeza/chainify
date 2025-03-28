@@ -1,6 +1,6 @@
 import { describe, expect, it, vitest as vi } from 'vitest'
 import { ChainifyStep, ChainifyStepType } from '../../lib/utils/step.js'
-import { defineGetters } from '../../lib/utils/getters.js'
+import { defineGetters } from '../../lib/utils/getter.js'
 
 describe('defineGetters', () => {
   function buildTest () {

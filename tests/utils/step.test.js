@@ -53,36 +53,36 @@ describe('of', () => {
   })
 })
 
-describe('validate', () => {
+describe('assert', () => {
   it('throws an exception if `name` is not a string', () => {
-    expect(() => ChainifyStep.validate())
+    expect(() => ChainifyStep.assert())
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`name\` should be a string.]`)
-    expect(() => ChainifyStep.validate(null))
+    expect(() => ChainifyStep.assert(null))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`name\` should be a string.]`)
-    expect(() => ChainifyStep.validate(5))
+    expect(() => ChainifyStep.assert(5))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`name\` should be a string.]`)
   })
 
   it('throws an exception if `fn` is not a function', () => {
-    expect(() => ChainifyStep.validate('name'))
+    expect(() => ChainifyStep.assert('name'))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`fn\` should be a function.]`)
-    expect(() => ChainifyStep.validate('name', null))
+    expect(() => ChainifyStep.assert('name', null))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`fn\` should be a function.]`)
-    expect(() => ChainifyStep.validate('name', {}))
+    expect(() => ChainifyStep.assert('name', {}))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`fn\` should be a function.]`)
   })
 
   it('throws an exception if `type` does not equal the step type', () => {
-    expect(() => ChainifyStep.validate('name', () => 5))
+    expect(() => ChainifyStep.assert('name', () => 5))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`type\` should be one of: factory, plain.]`)
-    expect(() => ChainifyStep.validate('name', () => 5, 5))
+    expect(() => ChainifyStep.assert('name', () => 5, 5))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`type\` should be one of: factory, plain.]`)
-    expect(() => ChainifyStep.validate('name', () => 5, 'abc'))
+    expect(() => ChainifyStep.assert('name', () => 5, 'abc'))
       .toThrowErrorMatchingInlineSnapshot(`[Error: \`type\` should be one of: factory, plain.]`)
   })
 
   it('does nothing if arguments are valid step configuration properties', () => {
-    expect(() => ChainifyStep.validate('name', () => 5, ChainifyStepType.plain)).not.toThrow()
-    expect(() => ChainifyStep.validate('another', () => undefined, ChainifyStepType.factory)).not.toThrow()
+    expect(() => ChainifyStep.assert('name', () => 5, ChainifyStepType.plain)).not.toThrow()
+    expect(() => ChainifyStep.assert('another', () => undefined, ChainifyStepType.factory)).not.toThrow()
   })
 })
