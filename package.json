@@ -1,21 +1,30 @@
 {
   "name": "@kamtugeza/chainify",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Lightweight utilities for composing and executing chained data validations and transformations.",
-  "keywords": ["build", "builder", "chain", "decorate", "transform", "validate"],
+  "keywords": [
+    "build",
+    "builder",
+    "chain",
+    "decorate",
+    "transform",
+    "validate"
+  ],
   "type": "module",
   "bugs": {
     "url": "https://github.com/kamtugeza/chainsmith/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kamtugeza/chainsmith"
+    "url": "git+https://github.com/kamtugeza/chainsmith.git"
   },
   "homepage": "https://github.com/kamtugeza/chainsmith#readme",
   "author": "Oleksii Novikov <hello@theoleksii.me>",
   "license": "MIT",
   "main": "lib/chainify.js",
-  "files": ["lib/**/*"],
+  "files": [
+    "lib/**/*"
+  ],
   "exports": {
     ".": "./lib/chainify.js",
     "./every": "./lib/every.js",
