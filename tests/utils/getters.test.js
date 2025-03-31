@@ -1,5 +1,5 @@
 import { describe, expect, it, vitest as vi } from 'vitest'
-import { ChainifyStep, ChainifyStepType } from '../../lib/utils/step.js'
+import { RechainifyStep, RechainifyStepType } from '../../lib/utils/step.js'
 import { defineGetters } from '../../lib/utils/getter.js'
 
 describe('defineGetters', () => {
@@ -11,8 +11,8 @@ describe('defineGetters', () => {
     const factory = vi.fn(() => plain)
 
     defineGetters(handler, [
-      ChainifyStep.of('plain', plain),
-      ChainifyStep.of('factory', factory, ChainifyStepType.factory),
+      RechainifyStep.of('plain', plain),
+      RechainifyStep.of('factory', factory, RechainifyStepType.factory),
     ])
 
     function resetTest () {

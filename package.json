@@ -1,6 +1,6 @@
 {
-  "name": "@kamtugeza/chainify",
-  "version": "0.5.3",
+  "name": "rechainify",
+  "version": "0.6.0",
   "description": "Lightweight utilities for composing and executing chained data validations and transformations.",
   "keywords": [
     "build",
@@ -12,21 +12,21 @@
   ],
   "type": "module",
   "bugs": {
-    "url": "https://github.com/kamtugeza/chainsmith/issues"
+    "url": "https://github.com/kamtugeza/rechainify/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kamtugeza/chainsmith.git"
+    "url": "git+https://github.com/kamtugeza/rechainify.git"
   },
-  "homepage": "https://github.com/kamtugeza/chainsmith#readme",
+  "homepage": "https://github.com/kamtugeza/rechainify#readme",
   "author": "Oleksii Novikov <hello@theoleksii.me>",
   "license": "MIT",
-  "main": "lib/chainify.js",
+  "main": "lib/rechainify.js",
   "files": [
     "lib/**/*"
   ],
   "exports": {
-    ".": "./lib/chainify.js",
+    ".": "./lib/rechainify.js",
     "./every": "./lib/every.js",
     "./map": "./lib/map.js",
     "./some": "./lib/some.js"

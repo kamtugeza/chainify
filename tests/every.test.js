@@ -1,27 +1,27 @@
 import { describe, expect, it } from 'vitest'
-import { ChainifyStep, ChainifyStepType } from '../lib/utils/step.js'
+import { RechainifyStep, RechainifyStepType } from '../lib/utils/step.js'
 import every from '../lib/every.js'
 
 describe('every', () => {
   function buildTest () {
     const chain = every([
-      ChainifyStep.of('number', (input) => typeof input === 'number' ? input * 2 : null),
-      ChainifyStep.of('positive', (input) => typeof input === 'number' && input >=0  ? input : null),
-      ChainifyStep.of(
+      RechainifyStep.of('number', (input) => typeof input === 'number' ? input * 2 : null),
+      RechainifyStep.of('positive', (input) => typeof input === 'number' && input >=0  ? input : null),
+      RechainifyStep.of(
         'currency',
         (symbol) => (input) => {
           const isCurrency = typeof symbol === 'string' && typeof input === 'string' && input.startsWith(symbol) 
           return isCurrency ? Number.parseFloat(input.slice(symbol.length)) : null 
         },
-        ChainifyStepType.factory,
+        RechainifyStepType.factory,
       ),
-      ChainifyStep.of(
+      RechainifyStep.of(
         'gte',
         (gte) => (input) => {
           const isGreaterOrEqual = typeof gte === 'number' && typeof input === 'number' && input >= gte
           return isGreaterOrEqual ? input : null
         },
-        ChainifyStepType.factory,
+        RechainifyStepType.factory,
       ),
     ])
 
@@ -44,8 +44,8 @@ describe('every', () => {
     const addOne = (input) => ++input
     const double = (input) => input * 2
     const chain = every([
-      ChainifyStep.of('addOne', addOne),
-      ChainifyStep.of('double', double),
+      RechainifyStep.of('addOne', addOne),
+      RechainifyStep.of('double', double),
     ]) 
 
     chain.addOne.double

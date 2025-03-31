@@ -1,27 +1,27 @@
 import { describe, expect, it } from 'vitest'
-import { ChainifyStep, ChainifyStepType } from '../lib/utils/step.js'
+import { RechainifyStep, RechainifyStepType } from '../lib/utils/step.js'
 import some from '../lib/some.js'
 
 describe('some', () => {
   function buildTest () {
     const chain = some([
-      ChainifyStep.of('number', (input) => typeof input === 'number' ? input * 2 : null),
-      ChainifyStep.of('string', (input) => typeof input === 'string' ? `${input}!` : null),
-      ChainifyStep.of(
+      RechainifyStep.of('number', (input) => typeof input === 'number' ? input * 2 : null),
+      RechainifyStep.of('string', (input) => typeof input === 'string' ? `${input}!` : null),
+      RechainifyStep.of(
         'currency',
         (symbol) => (input) => {
           const isCurrency = typeof symbol === 'string' && typeof input === 'string' && input.startsWith(symbol) 
           return isCurrency ? Number.parseFloat(input.slice(symbol.length)) : null 
         },
-        ChainifyStepType.factory,
+        RechainifyStepType.factory,
       ),
-      ChainifyStep.of(
+      RechainifyStep.of(
         'gte',
         (gte) => (input) => {
           const isGreaterOrEqual = typeof gte === 'number' && typeof input === 'number' && input >= gte
           return isGreaterOrEqual ? input : null
         },
-        ChainifyStepType.factory,
+        RechainifyStepType.factory,
       )
     ]) 
    
@@ -44,8 +44,8 @@ describe('some', () => {
     const addOne = (input) => ++input
     const double = (input) => input * 2
     const chain = some([
-      ChainifyStep.of('addOne', addOne),
-      ChainifyStep.of('double', double),
+      RechainifyStep.of('addOne', addOne),
+      RechainifyStep.of('double', double),
     ]) 
 
     chain.addOne.double

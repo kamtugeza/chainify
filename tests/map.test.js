@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { ChainifyStep, ChainifyStepType } from '../lib/utils/step.js'
+import { RechainifyStep, RechainifyStepType } from '../lib/utils/step.js'
 import map from '../lib/map.js'
 
 describe('map', () => {
@@ -26,8 +26,8 @@ describe('map', () => {
     
     it('applies plain decorators to the input', () => {
       const chain = map([
-        ChainifyStep.of('addOne', (input) => ++input),
-        ChainifyStep.of('double', (input) => input * 2),
+        RechainifyStep.of('addOne', (input) => ++input),
+        RechainifyStep.of('double', (input) => input * 2),
       ]) 
       expect(chain.addOne(5)).toBe(6)
       expect(chain.addOne.double(5)).toBe(12)
@@ -38,8 +38,8 @@ describe('map', () => {
       const addOne = (input) => ++input
       const double = (input) => input * 2
       const chain = map([
-        ChainifyStep.of('addOne', addOne),
-        ChainifyStep.of('double', double),
+        RechainifyStep.of('addOne', addOne),
+        RechainifyStep.of('double', double),
       ]) 
       chain.addOne.double
       expect(chain.__SEQUENCE__).toEqual([addOne, double])
@@ -50,8 +50,8 @@ describe('map', () => {
 
     it('applies factory decorators to the input', () => {
       const decorator = map([
-        ChainifyStep.of('add', (val) => (input) => input + val, ChainifyStepType.factory),
-        ChainifyStep.of('multiply', (val) => (input) => input * val, ChainifyStepType.factory),
+        RechainifyStep.of('add', (val) => (input) => input + val, RechainifyStepType.factory),
+        RechainifyStep.of('multiply', (val) => (input) => input * val, RechainifyStepType.factory),
       ]) 
       expect(decorator.add(2, 8)).toBe(10)
       expect(decorator.add(2).multiply(3, 4)).toBe(18)
@@ -59,10 +59,10 @@ describe('map', () => {
 
     it('applies a mixed set of decorators to the input', () => {
       const decorator = map([
-        ChainifyStep.of('add', (val) => (input) => input + val, ChainifyStepType.factory),
-        ChainifyStep.of('addOne', (input) => ++input),
-        ChainifyStep.of('double', (input) => input * 2),
-        ChainifyStep.of('multiply', (val) => (input) => input * val, ChainifyStepType.factory)
+        RechainifyStep.of('add', (val) => (input) => input + val, RechainifyStepType.factory),
+        RechainifyStep.of('addOne', (input) => ++input),
+        RechainifyStep.of('double', (input) => input * 2),
+        RechainifyStep.of('multiply', (val) => (input) => input * val, RechainifyStepType.factory)
       ])
       expect(decorator.addOne(5)).toBe(6)
       expect(decorator.add(2, 8)).toBe(10)

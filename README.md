@@ -1,6 +1,6 @@
-# Chainify
+# Rechainify
 
-Chainify is a lightweight, dependency-free utility library for composing and executing chained data transformations. It allows you to define reusable validation and transformation steps, organize them into flexible pipelines, and apply them conditionally based on your use case.
+**Rechainify** is a lightweight, dependency-free utility library for composing and executing chained data transformations. It allows you to define reusable validation and transformation steps, organize them into flexible pipelines, and apply them conditionally based on your use case.
 
 ## Table of Contents
 
@@ -18,20 +18,20 @@ Chainify is a lightweight, dependency-free utility library for composing and exe
 
 ## Quick Start 
 
-Install Chainify in your project:
+Install Rechainify in your project:
 
 ```bash
-npm i @kamtugeza/chainify
+npm i rechainify
 ```
 
 Create an instance of the builder and apply transformations to input values:
 
 ```js
-import Chainify, { ChainifyStep } from '@kamtugeza/chainify'
+import Rechainify, { RechainifyStep } from 'rechainify'
 
-const chain = Chainify.map([
-  ChainifyStep.of('category', (category) => (input) => ({ ...input, category }), 'factory'),
-  ChainifyStep.of('required', (input) => ({ ...input, required: true })),
+const chain = Rechainify.map([
+  RechainifyStep.of('category', (category) => (input) => ({ ...input, category }), 'factory'),
+  RechainifyStep.of('required', (input) => ({ ...input, required: true })),
 ])
 
 chain.required({ value: 5 }) // { required: true, value: 5 }
@@ -39,7 +39,7 @@ chain.required.category('author', { name: 'Lucy' })  // { category: 'author', na
 ```
 
 >[!NOTE]
-> You don’t need to import the barrel file (i.e., the main entry file that re-exports everything) — all methods can be accessed directly, e.g., `@kamtugeza/chainify/map` or `@kamtugeza/chainify/some`.
+> You don’t need to import the barrel file (i.e., the main entry file that re-exports everything) — all methods can be accessed directly, e.g., `rechainify/map` or `rechainify/some`.
 
 ## Handler
 
@@ -52,11 +52,11 @@ It’s important to note that the handler is invoked during chaining when:
 - a factory step is executed with two arguments (the configuration and the input).
 
 ```js
-import Chainify from '@kamtugeza/chainify'
+import Rechainify from 'rechainify'
 
-const chain = Chainify.some([
-  ChainifyStep.of('category', (category) => (input) => ({ ...input, category }), 'factory'),
-  ChainifyStep.of('required', (input) => ({ ...input, required: true })),
+const chain = Rechainify.some([
+  RechainifyStep.of('category', (category) => (input) => ({ ...input, category }), 'factory'),
+  RechainifyStep.of('required', (input) => ({ ...input, required: true })),
 ])
 
 chain.required(5) // the first argument is passed to the handler
@@ -88,13 +88,13 @@ interface Step {
 }
 ```
 
-For convenience, you can use the `ChainifyStep.of(name, fn, type)` factory to configure a step: 
+For convenience, you can use the `RechainifyStep.of(name, fn, type)` factory to configure a step: 
 
 ```js
-import { ChainifyStep } from '@kamtugeza/chainify'
+import { RechainifyStep } from 'rechainify'
 
-ChainifyStep.of('required', (input) => ({ ...input, required: true }))
-ChainifyStep.of('category', (category) => (input) => ({ ...input, category }), 'factory')
+RechainifyStep.of('required', (input) => ({ ...input, required: true }))
+RechainifyStep.of('category', (category) => (input) => ({ ...input, category }), 'factory')
 ```
 
 >[!NOTE]
@@ -105,11 +105,11 @@ ChainifyStep.of('category', (category) => (input) => ({ ...input, category }), '
 A _plain step_ is the simplest type of method in the chain. It accepts an input, processes and/or validates it, and returns a new value (or the original one, depending on the design):
 
 ```js
-import Chainify, { ChainifyStep } from '@kamtugeza/chainify'
+import Rechainify, { RechainifyStep } from 'rechainify'
 
-const chain = Chainify.every([
-  ChainifyStep.of('number', (input) => typeof input === 'number' ? input : null, 'plain'),
-  ChainifyStep.of('required', (input) => input !== undefined ? input : null)
+const chain = Rechainify.every([
+  RechainifyStep.of('number', (input) => typeof input === 'number' ? input : null, 'plain'),
+  RechainifyStep.of('required', (input) => input !== undefined ? input : null)
 ]) 
 
 chain.required(undefined)   // null
@@ -119,7 +119,7 @@ chain.required().number(5)  // ReferenceError
 ```
 
 >[!NOTE]
-> The `type` argument in `ChainifyStep.of(name, fn, type)` is optional and defaults to `plain`.
+> The `type` argument in `RechainifyStep.of(name, fn, type)` is optional and defaults to `plain`.
 
 >[!WARNING]
 > A plain method returns the final handler. This means that if you execute a step in the middle of the chain, you’ll get a `ReferenceError` because the chain has already been closed by calling the handler.
@@ -129,11 +129,11 @@ chain.required().number(5)  // ReferenceError
 A _factory step_ works the same way as a plain step, with one key difference: it can be configured during chaining.
 
 ```js
-import Chainify, { ChainifyStep } from '@kamtugeza/chainify'
+import Rechainify, { RechainifyStep } from 'rechainify'
 
-const chain = Chainify.every([
-  ChainifyStep.of('max', (boundary) => (input) => input < boundary ? input : null, 'factory')
-  ChainifyStep.of('min', (boundary) => (input) => input > boundary ? input : null, 'factory')
+const chain = Rechainify.every([
+  RechainifyStep.of('max', (boundary) => (input) => input < boundary ? input : null, 'factory')
+  RechainifyStep.of('min', (boundary) => (input) => input > boundary ? input : null, 'factory')
 ])
 
 chain.min(5, 6)             // 6
@@ -153,17 +153,17 @@ chain.max(10, 7).min(5, 7)  // ReferenceError
 The `every` method creates a [handler](#handler) that helps build a scenario — a sequence of [steps](#steps) — and applies it to an input. Each step is executed in order, and the output of one step is passed as the input to the next. If any step fails the predicate, the handler returns `null` immediately; otherwise, it returns the result of the final step.
 
 ```js
-import Chainify, { ChainifyPredicate, ChainifyStep } from '@kamtugeza/chainify'
+import Rechainify, { RechainifyPredicate, RechainifyStep } from 'rechainify'
 
-const chain = Chainify.every(
+const chain = Rechainify.every(
   [
-    ChainifyStep.of('number', (input) => {
+    RechainifyStep.of('number', (input) => {
       const possiblyNumber = typeof input === 'number' ? input : parseInt(input, 10)
       return Number.isNaN(possiblyNumber) ? null : possiblyNumber
     }),
-    ChainifyStep.of('min', (left) => (input) => input > left ? input : null, 'factory')
+    RechainifyStep.of('min', (left) => (input) => input > left ? input : null, 'factory')
   ],
-  ChainifyPredicate.isNonNull
+  RechainifyPredicate.isNonNull
 )
 
 chain.number(5) // 5
@@ -175,7 +175,7 @@ chain.min(5).number('6') // null
 ```
 
 >[!NOTE]
-> The `predicate` argument is optional and defaults to `ChainifyPredicate.isNonNull`.
+> The `predicate` argument is optional and defaults to `RechainifyPredicate.isNonNull`.
 
 >[!NOTE]
 > If you need complex validation and transformation, it makes sense to look at [zod](https://zod.dev/).
@@ -185,11 +185,11 @@ chain.min(5).number('6') // null
 The `map` method creates a [handler](#handler) that helps build a scenario — a sequence of transformation [steps](#steps) — and applies it to an input. Each step is executed in order, with the output of one step passed as the input to the next, until the final step returns the result.
 
 ```js
-import Chainify, { ChainifyStep } from '@kamtugeza/chainify'
+import Rechainify, { RechainifyStep } from 'rechainify'
 
-const chain = Chainify.map([
-  ChainifyStep.of('double', (input) => input * 2),
-  ChainifyStep.of('divideBy', (divider) => (input) => input / divider, 'factory')
+const chain = Rechainify.map([
+  RechainifyStep.of('double', (input) => input * 2),
+  RechainifyStep.of('divideBy', (divider) => (input) => input / divider, 'factory')
 ])
 
 chain.double.divideBy(3, 6) // 4 
@@ -201,14 +201,14 @@ chain.divideBy(3).double(9) // 6
 The `some` method creates a [handler](#handler) that allows you to build a scenario — a sequence of [steps](#steps) — and apply it to an input. Each step is executed in order with the input value, until a result satisfies the given predicate. The handler returns `null` if no step produces a satisfying result.
 
 ```js
-import Chainify, { ChainifyPredicate, ChainifyStep } from '@kamtugeza/chainify'
+import Rechainify, { RechainifyPredicate, RechainifyStep } from 'rechainify'
 
-const chain = Chainify.some(
+const chain = Rechainify.some(
   [
-    ChainifyStep.of('px', (input) => input.endsWith('px') ? parseInt(input, 10) : null),
-    ChainifyStep.of('em', (input) => input.endsWith('em') ? parseInt(input, 10) : null)
+    RechainifyStep.of('px', (input) => input.endsWith('px') ? parseInt(input, 10) : null),
+    RechainifyStep.of('em', (input) => input.endsWith('em') ? parseInt(input, 10) : null)
   ],
-  ChainifyPredicate.isNonNull
+  RechainifyPredicate.isNonNull
 )
 
 chain.px.em('10px') // 10
@@ -218,7 +218,7 @@ chain.em.px('10em') // 10
 ```
 
 >[!NOTE]
-> The `predicate` argument is optional and defaults to `ChainifyPredicate.isNonNull`.
+> The `predicate` argument is optional and defaults to `RechainifyPredicate.isNonNull`.
 
 ## Roadmap
 
