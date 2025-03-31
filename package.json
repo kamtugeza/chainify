@@ -1,6 +1,6 @@
 {
   "name": "@kamtugeza/chainify",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Lightweight utilities for composing and executing chained data validations and transformations.",
   "keywords": ["build", "builder", "chain", "decorate", "transform", "validate"],
   "type": "module",
