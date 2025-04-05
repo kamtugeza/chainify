@@ -82,6 +82,7 @@ There are two types of step functions:
 >[!NOTE]
 > Each function is executed once during step definition to determine the step type.  
 > If the function returns another function, it is treated as a **factory** step; otherwise, it's a **plain** step.
+> If the function throws an exception during this check, it is also treated as a **plain** step.
 
 You can configure a list of steps in two ways:
 - As an array of tuples `Array<[string, Function]>`.

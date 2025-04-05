@@ -144,4 +144,14 @@ describe('defineGetters', () => {
     expect(handler.__SEQUENCE__).toHaveLength(1)
     expect(handler.__SEQUENCE__).toHaveProperty(0, plain)
   })
+
+  it('adds a plain step if the function throws an exception', () => {
+    const steps = { withName: (input) => !!input.name ? input : null }
+    expect(() => defineGetters(() => {}, steps)).not.toThrow() 
+    
+    const handler = (input) => input
+    handler.__SEQUENCE__ = []
+    defineGetters(handler, steps)
+    expect(handler.withName({ name: 'Lucy' })).toEqual({ name: 'Lucy' }) 
+  })
 })
