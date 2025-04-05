@@ -27,12 +27,12 @@ npm i rechainify
 Create an instance of the builder and apply transformations to input values:
 
 ```js
-import Rechainify, { RechainifyStep } from 'rechainify'
+import Rechainify from 'rechainify'
 
-const chain = Rechainify.map([
-  RechainifyStep.of('category', (category) => (input) => ({ ...input, category }), 'factory'),
-  RechainifyStep.of('required', (input) => ({ ...input, required: true })),
-])
+const chain = Rechainify.map({
+  category: (category) => (input) => ({ ...input, category }),
+  required: (input) => ({ ...input, required: true }),
+})
 
 chain.required({ value: 5 }) // { required: true, value: 5 }
 chain.required.category('author', { name: 'Lucy' })  // { category: 'author', name: 'Lucy', required: true }
@@ -54,10 +54,10 @@ It’s important to note that the handler is invoked during chaining when:
 ```js
 import Rechainify from 'rechainify'
 
-const chain = Rechainify.some([
-  RechainifyStep.of('category', (category) => (input) => ({ ...input, category }), 'factory'),
-  RechainifyStep.of('required', (input) => ({ ...input, required: true })),
-])
+const chain = Rechainify.some({
+  category: (category) => (input) => ({ ...input, category }),
+  required: (input) => ({ ...input, required: true }),
+})
 
 chain.required(5) // the first argument is passed to the handler
 chain.category('author', { name: 'Elfo' }) // the second argument is passed to the handler
@@ -73,53 +73,37 @@ chain.required().category('author', { name: 'Elfo' }) // ReferenceError
 
 A **step** is a unit of work added to the chain sequence during chaining. When the final handler is executed, the input value flows through each step in the chained order — each step receives the output of the previous step.
 
-The step configuration is an object with three properties:
+Each step consists of a name (i.e., `string`) and a function that implements the step behavior.
 
-```ts
-interface Step {
-  /* Behavior of the step. */
-  fn: (input: any) => any | (options: any) => (input: any) => any
-
-  /* The name of the static method added to the handler. */
-  name: string
-
-  /* Type of the step. This is a necessary workaround in the current implementation. */
-  type?: 'factory' | 'plain' 
-}
-```
-
-For convenience, you can use the `RechainifyStep.of(name, fn, type)` factory to configure a step: 
-
-```js
-import { RechainifyStep } from 'rechainify'
-
-RechainifyStep.of('required', (input) => ({ ...input, required: true }))
-RechainifyStep.of('category', (category) => (input) => ({ ...input, category }), 'factory')
-```
+There are two types of step functions:
+- A plain function `(input: any) => any`.
+- A factory function `(options: any) => (input: any) => any`.
 
 >[!NOTE]
-> Using the factory is optional but recommended for consistency and to support potential future enhancements.
+> Each function is executed once during step definition to determine the step type.  
+> If the function returns another function, it is treated as a **factory** step; otherwise, it's a **plain** step.
+
+You can configure a list of steps in two ways:
+- As an array of tuples `Array<[string, Function]>`.
+- As an object `Record<string, Function>`.
 
 ### Plain
 
 A _plain step_ is the simplest type of method in the chain. It accepts an input, processes and/or validates it, and returns a new value (or the original one, depending on the design):
 
 ```js
-import Rechainify, { RechainifyStep } from 'rechainify'
+import Rechainify from 'rechainify'
 
-const chain = Rechainify.every([
-  RechainifyStep.of('number', (input) => typeof input === 'number' ? input : null, 'plain'),
-  RechainifyStep.of('required', (input) => input !== undefined ? input : null)
-]) 
+const chain = Rechainify.every({
+  number: (input) => typeof input === 'number' ? input : null,
+  required: (input) => input !== undefined ? input : null,
+}) 
 
 chain.required(undefined)   // null
 chain.required(5)           // 5
 chain.required.number(5)    // 5
 chain.required().number(5)  // ReferenceError
 ```
-
->[!NOTE]
-> The `type` argument in `RechainifyStep.of(name, fn, type)` is optional and defaults to `plain`.
 
 >[!WARNING]
 > A plain method returns the final handler. This means that if you execute a step in the middle of the chain, you’ll get a `ReferenceError` because the chain has already been closed by calling the handler.
@@ -129,12 +113,12 @@ chain.required().number(5)  // ReferenceError
 A _factory step_ works the same way as a plain step, with one key difference: it can be configured during chaining.
 
 ```js
-import Rechainify, { RechainifyStep } from 'rechainify'
+import Rechainify from 'rechainify'
 
-const chain = Rechainify.every([
-  RechainifyStep.of('max', (boundary) => (input) => input < boundary ? input : null, 'factory')
-  RechainifyStep.of('min', (boundary) => (input) => input > boundary ? input : null, 'factory')
-])
+const chain = Rechainify.every({
+  max: (boundary) => (input) => input < boundary ? input : null,
+  min: (boundary) => (input) => input > boundary ? input : null,
+})
 
 chain.min(5, 6)             // 6
 chain.min(5, 4)             // null
@@ -153,25 +137,25 @@ chain.max(10, 7).min(5, 7)  // ReferenceError
 The `every` method creates a [handler](#handler) that helps build a scenario — a sequence of [steps](#steps) — and applies it to an input. Each step is executed in order, and the output of one step is passed as the input to the next. If any step fails the predicate, the handler returns `null` immediately; otherwise, it returns the result of the final step.
 
 ```js
-import Rechainify, { RechainifyPredicate, RechainifyStep } from 'rechainify'
+import Rechainify, { RechainifyPredicate } from 'rechainify'
 
 const chain = Rechainify.every(
-  [
-    RechainifyStep.of('number', (input) => {
+  {
+    number: (input) => {
       const possiblyNumber = typeof input === 'number' ? input : parseInt(input, 10)
       return Number.isNaN(possiblyNumber) ? null : possiblyNumber
-    }),
-    RechainifyStep.of('min', (left) => (input) => input > left ? input : null, 'factory')
-  ],
+    },
+    min: (left) => (input) => input > left ? input : null,
+  },
   RechainifyPredicate.isNonNull
 )
 
-chain.number(5) // 5
-chain.number('5') // 5
-chain.number.min(5, 7) // 7
-chain.number.min(5, 3) // null
-chain.min(5).number(6) // 6
-chain.min(5).number('6') // null
+chain.number(5)           // 5
+chain.number('5')         // 5
+chain.number.min(5, 7)    // 7
+chain.number.min(5, 3)    // null
+chain.min(5).number(6)    // 6
+chain.min(5).number('6')  // null
 ```
 
 >[!NOTE]
@@ -185,12 +169,12 @@ chain.min(5).number('6') // null
 The `map` method creates a [handler](#handler) that helps build a scenario — a sequence of transformation [steps](#steps) — and applies it to an input. Each step is executed in order, with the output of one step passed as the input to the next, until the final step returns the result.
 
 ```js
-import Rechainify, { RechainifyStep } from 'rechainify'
+import Rechainify from 'rechainify'
 
-const chain = Rechainify.map([
-  RechainifyStep.of('double', (input) => input * 2),
-  RechainifyStep.of('divideBy', (divider) => (input) => input / divider, 'factory')
-])
+const chain = Rechainify.map({
+  double: (input) => input * 2,
+  divideBy: (divider) => (input) => input / divider,
+})
 
 chain.double.divideBy(3, 6) // 4 
 chain.divideBy(3).double(9) // 6
@@ -201,13 +185,13 @@ chain.divideBy(3).double(9) // 6
 The `some` method creates a [handler](#handler) that allows you to build a scenario — a sequence of [steps](#steps) — and apply it to an input. Each step is executed in order with the input value, until a result satisfies the given predicate. The handler returns `null` if no step produces a satisfying result.
 
 ```js
-import Rechainify, { RechainifyPredicate, RechainifyStep } from 'rechainify'
+import Rechainify, { RechainifyPredicate } from 'rechainify'
 
 const chain = Rechainify.some(
-  [
-    RechainifyStep.of('px', (input) => input.endsWith('px') ? parseInt(input, 10) : null),
-    RechainifyStep.of('em', (input) => input.endsWith('em') ? parseInt(input, 10) : null)
-  ],
+  {
+    px: (input) => input.endsWith('px') ? parseInt(input, 10) : null,
+    em: (input) => input.endsWith('em') ? parseInt(input, 10) : null,
+  },
   RechainifyPredicate.isNonNull
 )
 
@@ -222,7 +206,7 @@ chain.em.px('10em') // 10
 
 ## Roadmap
 
-- [ ] Avoid using the type property in step configuration. Instead, accept steps as a `Record<name, function>`.
+- [x] Avoid using the type property in step configuration. Instead, accept steps as a `Record<name, function>`.
 - [ ] Add support for an arbitrary number of arguments in factory steps.
 
 ## License

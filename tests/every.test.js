@@ -1,52 +1,55 @@
 import { describe, expect, it } from 'vitest'
-import { RechainifyStep, RechainifyStepType } from '../lib/utils/step.js'
 import every from '../lib/every.js'
 
 describe('every', () => {
   function buildTest () {
-    const chain = every([
-      RechainifyStep.of('number', (input) => typeof input === 'number' ? input * 2 : null),
-      RechainifyStep.of('positive', (input) => typeof input === 'number' && input >=0  ? input : null),
-      RechainifyStep.of(
-        'currency',
-        (symbol) => (input) => {
-          const isCurrency = typeof symbol === 'string' && typeof input === 'string' && input.startsWith(symbol) 
-          return isCurrency ? Number.parseFloat(input.slice(symbol.length)) : null 
-        },
-        RechainifyStepType.factory,
-      ),
-      RechainifyStep.of(
-        'gte',
-        (gte) => (input) => {
-          const isGreaterOrEqual = typeof gte === 'number' && typeof input === 'number' && input >= gte
-          return isGreaterOrEqual ? input : null
-        },
-        RechainifyStepType.factory,
-      ),
-    ])
+    const chain = every({
+      currency: (symbol) => (input) => {
+        const isCurrency = typeof symbol === 'string' && typeof input === 'string' && input.startsWith(symbol) 
+        return isCurrency ? Number.parseFloat(input.slice(symbol.length)) : null 
+      },
+      gte: (gte) => (input) => {
+        const isGreaterOrEqual = typeof gte === 'number' && typeof input === 'number' && input >= gte
+        return isGreaterOrEqual ? input : null
+      }, 
+      number: (input) => typeof input === 'number' ? input * 2 : null,
+      positive: (input) => typeof input === 'number' && input >=0  ? input : null,
+    })
 
     return { chain }
   }
 
-  it('throws an exception when `steps` are not an array', () => {
-    expect(() => every()).toThrowErrorMatchingInlineSnapshot(`[Error: \`steps\` should be an array.]`)
-    expect(() => every({})).toThrowErrorMatchingInlineSnapshot(`[Error: \`steps\` should be an array.]`)
+  it('throws an exception when the `step` argument is not an array or an object', () => {
+    expect(() => every()).not.toThrow()
+    expect(() => every([])).not.toThrow()
+    expect(() => every({})).not.toThrow()
+    expect(() => every(null))
+      .toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: \`steps\` argument should be either an array or an object]`
+      )
+    expect(() => every(5))
+      .toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: \`steps\` argument should be either an array or an object]`
+      )
+    expect(() => every('steps'))
+      .toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: \`steps\` argument should be either an array or an object]`
+      )
   })
 
   it('throws an exception when `predicate` is not a function', () => {
     expect(() => every([], () => true)).not.toThrow()
     expect(() => every([])).not.toThrow()
-    expect(() => every([], null)).toThrowErrorMatchingInlineSnapshot(`[Error: \`predicate\` should be a function.]`)
-    expect(() => every([], 'abc')).toThrowErrorMatchingInlineSnapshot(`[Error: \`predicate\` should be a function.]`)
+    expect(() => every([], null))
+      .toThrowErrorMatchingInlineSnapshot(`[TypeError: \`predicate\` should be a function.]`)
+    expect(() => every([], 'abc'))
+      .toThrowErrorMatchingInlineSnapshot(`[TypeError: \`predicate\` should be a function.]`)
   })
 
   it('clears the sequence after the input decoration', () => {
     const addOne = (input) => ++input
     const double = (input) => input * 2
-    const chain = every([
-      RechainifyStep.of('addOne', addOne),
-      RechainifyStep.of('double', double),
-    ]) 
+    const chain = every({ addOne, double }) 
 
     chain.addOne.double
     expect(chain.__SEQUENCE__).toEqual([addOne, double])

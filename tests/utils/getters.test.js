@@ -1,5 +1,4 @@
 import { describe, expect, it, vitest as vi } from 'vitest'
-import { RechainifyStep, RechainifyStepType } from '../../lib/utils/step.js'
 import { defineGetters } from '../../lib/utils/getter.js'
 
 describe('defineGetters', () => {
@@ -7,13 +6,13 @@ describe('defineGetters', () => {
     const handler = vi.fn() 
     handler.__SEQUENCE__ = []
 
-    const plain = vi.fn()
     const factory = vi.fn(() => plain)
+    const plain = vi.fn()
 
-    defineGetters(handler, [
-      RechainifyStep.of('plain', plain),
-      RechainifyStep.of('factory', factory, RechainifyStepType.factory),
-    ])
+    defineGetters(handler, { factory, plain })
+
+    factory.mockReset()
+    plain.mockReset()
 
     function resetTest () {
       handler.__SEQUENCE__ = []
@@ -23,20 +22,89 @@ describe('defineGetters', () => {
     return { factory, handler, plain, resetTest }
   }
 
-  it('throws an exception when `steps` contains a non-step configuration', () => {
-    expect(() => defineGetters(() => 5, [{ }]))
-      .toThrowErrorMatchingInlineSnapshot(`[Error: \`name\` should be a string.]`)
-    expect(() => defineGetters(() => 5, [{ name: 'name' }]))
-      .toThrowErrorMatchingInlineSnapshot(`[Error: \`fn\` should be a function.]`)
-    expect(() => defineGetters(() => 5, [{ name: 'name', fn: () => null }]))
-      .toThrowErrorMatchingInlineSnapshot(`[Error: \`type\` should be one of: factory, plain.]`)
+  it('throws an exception when the `handler` argument is not a function', () => {
+    expect(() => defineGetters(() => {})).not.toThrow()
+    expect(() => defineGetters(null))
+      .toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: \`handler\` argument should be an function]`
+      )
+    expect(() => defineGetters('handler'))
+      .toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: \`handler\` argument should be an function]`
+      )
+    expect(() => defineGetters({}))
+      .toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: \`handler\` argument should be an function]`
+      )
   })
 
-  it('defines steps as handler static methods', () => {
-    const { handler } = buildTest()
+  it('throws an exception when the `step` argument is not an array or an object', () => {
+    expect(() => defineGetters(() => {})).not.toThrow()
+    expect(() => defineGetters(() => {}, [])).not.toThrow()
+    expect(() => defineGetters(() => {}, {})).not.toThrow()
+    expect(() => defineGetters(() => {}, null))
+      .toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: \`steps\` argument should be either an array or an object]`
+      )
+    expect(() => defineGetters(() => {}, 5))
+      .toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: \`steps\` argument should be either an array or an object]`
+      )
+    expect(() => defineGetters(() => {}, 'steps'))
+      .toThrowErrorMatchingInlineSnapshot(
+        `[TypeError: \`steps\` argument should be either an array or an object]`
+      )
+  })
+
+  it('throws an exception when the step is an invalid record in an array or an object', () => {
+    expect(() => defineGetters(() => {}, [5]))
+      .toThrowErrorMatchingInlineSnapshot(`[TypeError: \`step\` should be an array.]`)
+    expect(() => defineGetters(() => {}, [{}]))
+      .toThrowErrorMatchingInlineSnapshot(`[TypeError: \`step\` should be an array.]`)
+    expect(() => defineGetters(() => {}, ['step']))
+      .toThrowErrorMatchingInlineSnapshot(`[TypeError: \`step\` should be an array.]`)
+    expect(() => defineGetters(() => {}, [[]]))
+      .toThrowErrorMatchingInlineSnapshot(`[TypeError: \`name\` should be a string.]`)
+    expect(() => defineGetters(() => {}, [[5]]))
+      .toThrowErrorMatchingInlineSnapshot(`[TypeError: \`name\` should be a string.]`)
+    expect(() => defineGetters(() => {}, [['required']]))
+      .toThrowErrorMatchingInlineSnapshot(`[TypeError: \`fn\` should be a function.]`)
+    expect(() => defineGetters(() => {}, [['required', 5]]))
+      .toThrowErrorMatchingInlineSnapshot(`[TypeError: \`fn\` should be a function.]`)
+    expect(() => defineGetters(() => {}, [['required', {} ]]))
+      .toThrowErrorMatchingInlineSnapshot(`[TypeError: \`fn\` should be a function.]`)
+  })
+
+  it('does nothing when there is no steps', () => {
+    const handler = vi.fn()
+    const expected = Object.keys(handler).length
+  
+    defineGetters(handler)
+    expect(Object.keys(handler).length).toBe(expected)
+
+    handler.mockReset()
+    defineGetters(handler, [])
+    expect(Object.keys(handler).length).toBe(expected)
+
+    handler.mockReset()
+    defineGetters(handler, {})
+    expect(Object.keys(handler).length).toBe(expected)
+  })
+
+  it('attaches a step to the handler as a static method', () => {
+    const handler = vi.fn() 
+    handler.__SEQUENCE__ = []
+
+    const factory = vi.fn(() => plain)
+    const plain = vi.fn()
+
+    defineGetters(handler, { factory, plain })
+
+    expect(handler.factory).toBeInstanceOf(Function)
+    expect(factory).toBeCalledTimes(1)
 
     expect(handler.plain).toBeInstanceOf(Function)
-    expect(handler.factory).toBeInstanceOf(Function)
+    expect(plain).toBeCalledTimes(1)
   })
 
   it('adds a plain step to the sequence', () => {
