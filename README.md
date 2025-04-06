@@ -41,6 +41,9 @@ chain.required.category('author', { name: 'Lucy' })  // { category: 'author', na
 >[!NOTE]
 > You don’t need to import the barrel file (i.e., the main entry file that re-exports everything) — all methods can be accessed directly, e.g., `rechainify/map` or `rechainify/some`.
 
+>[!WARNING]
+> If you're using **TypeScript** and define `steps` as entries of type `[string, Function][]`, it's important to make it `readonly` (e.g., using `as const`); otherwise, you'll lose helpful code intelligence features.
+
 ## Handler
 
 A **handler** is the core component that exposes a static method for each configured step, enabling the chaining of steps in different _scenarios_.
@@ -208,6 +211,7 @@ chain.em.px('10em') // 10
 ## Roadmap
 
 - [x] Avoid using the type property in step configuration. Instead, accept steps as a `Record<name, function>`.
+- [x] Migrate to Typescript 🙃
 - [ ] Add support for an arbitrary number of arguments in factory steps.
 
 ## License

@@ -1,6 +1,6 @@
 {
   "name": "rechainify",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Lightweight utilities for composing and executing chained data validations and transformations.",
   "keywords": [
     "build",
@@ -22,6 +22,7 @@
   "author": "Oleksii Novikov <hello@theoleksii.me>",
   "license": "MIT",
   "main": "lib/rechainify.js",
+  "types": "lib/rechainify.d.ts",
   "files": [
     "lib/**/*"
   ],
@@ -32,9 +33,11 @@
     "./some": "./lib/some.js"
   },
   "scripts": {
+    "build": "tsc",
     "test": "vitest"
   },
   "devDependencies": {
+    "typescript": "^5.8.3",
     "vitest": "^3.0.9"
   }
 }
