@@ -141,7 +141,7 @@ chain.max(10, 7).min(5, 7)  // ReferenceError
 The `every` method creates a [handler](#handler) that helps build a scenario — a sequence of [steps](#steps) — and applies it to an input. Each step is executed in order, and the output of one step is passed as the input to the next. If any step fails the predicate, the handler returns `null` immediately; otherwise, it returns the result of the final step.
 
 ```js
-import Rechainify, { RechainifyPredicate } from 'rechainify'
+import Rechainify from 'rechainify'
 
 const chain = Rechainify.every(
   {
@@ -151,7 +151,7 @@ const chain = Rechainify.every(
     },
     min: (left) => (input) => input > left ? input : null,
   },
-  RechainifyPredicate.isNonNull
+  (input) => input !== null
 )
 
 chain.number(5)           // 5
@@ -163,7 +163,7 @@ chain.min(5).number('6')  // null
 ```
 
 >[!NOTE]
-> The `predicate` argument is optional and defaults to `RechainifyPredicate.isNonNull`.
+> The `predicate` argument is optional and defaults to `(input: unknown): boolean => input !== null`.
 
 >[!NOTE]
 > If you need complex validation and transformation, it makes sense to look at [zod](https://zod.dev/).
@@ -189,14 +189,14 @@ chain.divideBy(3).double(9) // 6
 The `some` method creates a [handler](#handler) that allows you to build a scenario — a sequence of [steps](#steps) — and apply it to an input. Each step is executed in order with the input value, until a result satisfies the given predicate. The handler returns `null` if no step produces a satisfying result.
 
 ```js
-import Rechainify, { RechainifyPredicate } from 'rechainify'
+import Rechainify from 'rechainify'
 
 const chain = Rechainify.some(
   {
     px: (input) => input.endsWith('px') ? parseInt(input, 10) : null,
     em: (input) => input.endsWith('em') ? parseInt(input, 10) : null,
   },
-  RechainifyPredicate.isNonNull
+  (input) => input !== null
 )
 
 chain.px.em('10px') // 10
@@ -206,7 +206,7 @@ chain.em.px('10em') // 10
 ```
 
 >[!NOTE]
-> The `predicate` argument is optional and defaults to `RechainifyPredicate.isNonNull`.
+> The `predicate` argument is optional and defaults to `(input: unknown): boolean => input !== null`.
 
 ## Roadmap
 
